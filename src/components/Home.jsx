@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   return (
@@ -12,18 +13,22 @@ const Home = () => {
           <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Marks Entry</h2>
             <p className="text-gray-600">Enter marks for various tests such as CIE, Assignments, and more.</p>
-            <button className="mt-4 px-4 py-2 bg-primary text-white rounded">
-              Go to Marks Entry
-            </button>
+            <Link to="/marks">
+             <button className="mt-4 px-4 py-2 bg-primary text-white rounded">
+                Go to Marks Entry
+             </button>
+            </Link>
           </div>
 
           {/* Attendance Entry Column */}
           <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Attendance Entry</h2>
             <p className="text-gray-600">Record student attendance for different subjects and dates.</p>
-            <button className="mt-4 px-4 py-2 bg-primary text-white rounded">
-              Go to Attendance Entry
-            </button>
+            <Link to="/attendance">
+              <button className="mt-4 px-4 py-2 bg-primary text-white rounded">
+                Go to Attendance Entry
+              </button>
+            </Link>
           </div>
 
           {/* Reports Column */}
