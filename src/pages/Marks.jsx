@@ -2,21 +2,42 @@ import React, { useState } from 'react';
 
 const Marks = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [examType, setExamType] = useState('');
+  const [maxMarks, setMaxMarks] = useState(0);
   const [students, setStudents] = useState([
     { sNo: 1, rollNo: '123', name: 'John Doe', marks: '' },
     { sNo: 2, rollNo: '124', name: 'Jane Smith', marks: '' },
     // Add more student records as needed
   ]);
 
+  // Function to handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
   };
 
+  // Function to handle exam type change and set max marks
+  const handleExamTypeChange = (e) => {
+    const selectedExamType = e.target.value;
+    setExamType(selectedExamType);
+    
+    // Set max marks based on the selected exam type
+    if (selectedExamType === 'CIE-1' || selectedExamType === 'CIE-2') {
+      setMaxMarks(20);
+    } else {
+      setMaxMarks(10);
+    }
+  };
+
+  // Function to handle marks input change, ensuring marks do not exceed the max marks
   const handleMarksChange = (index, value) => {
-    const updatedStudents = [...students];
-    updatedStudents[index].marks = value;
-    setStudents(updatedStudents);
+    if (value <= maxMarks) {
+      const updatedStudents = [...students];
+      updatedStudents[index].marks = value;
+      setStudents(updatedStudents);
+    } else {
+      alert(`Marks cannot exceed the maximum of ${maxMarks}`);
+    }
   };
 
   return (
@@ -61,18 +82,26 @@ const Marks = () => {
             <option value="Chemistry">Chemistry</option>
           </select>
 
-          <select className="border p-2 rounded">
+          {/* Exam Type Dropdown with Max Marks Update */}
+          <select className="border p-2 rounded" value={examType} onChange={handleExamTypeChange}>
             <option value="">Select Test Type</option>
             <option value="CIE-1">CIE-1</option>
             <option value="CIE-2">CIE-2</option>
-            <option value="ASSIGNMENT-1">Assignment-1</option>
-            <option value="ASSIGNMENT-2">Assignment-2</option>
-            <option value="ASSIGNMENT-2">Assignment-3</option>
-            <option value="SURPRISETEST-1">Surprise Test-1</option>
-            <option value="SURPRISETEST-2">Surprise Test-2</option>
-            <option value="SURPRISETEST-2">Surprise Test-3</option>
+            <option value="ASSIGNMENT - 1">Assignment-1</option>
+            <option value="ASSIGNMENT - 2">Assignment-2</option>
+            <option value="ASSIGNMENT - 3">Assignment-3</option>
+            <option value="SURPRISE TEST - 1">Surprise Test-1</option>
+            <option value="SURPRISE TEST - 2">Surprise Test-2</option>
+            <option value="SURPRISE TEST - 3">Surprise Test-3</option>
           </select>
         </div>
+
+        {/* Max Marks Display */}
+        {examType && (
+          <p className="mt-6 ml-28 text-lg text-blue-700">
+            The maximum marks for {examType} is {maxMarks}.
+          </p>
+        )}
 
         {/* Submit button */}
         <button type="submit" className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
@@ -105,6 +134,8 @@ const Marks = () => {
                       className="border p-2 rounded w-full"
                       value={student.marks}
                       onChange={(e) => handleMarksChange(index, e.target.value)}
+                      max={maxMarks}
+                      min={0}
                     />
                   </td>
                 </tr>
