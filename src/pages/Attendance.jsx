@@ -1,17 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const Attendance = () => {
   const [submitted, setSubmitted] = useState(false);
-  const [totalClasses, setTotalClasses] = useState('');
-  const [students, setStudents] = useState([
-    { sNo: 1, rollNo: '123', name: 'John Doe', classesAttended: '' },
-    { sNo: 2, rollNo: '124', name: 'Jane Smith', classesAttended: '' },
-    // Add more student records as needed
-  ]);
+  const [totalClasses, setTotalClasses] = useState("");
+  const [students, setStudents] = useState([]);
+  const [filters, setFilters] = useState({
+    year: "",
+    semester: "",
+    section: "",
+    subject: "",
+  });
+  const selectedBranch = localStorage.getItem("selectedBranch"); // Get branch from storage
 
-  const handleSubmit = (e) => {
+  const fetchStudents = async () => {
+    if (filters.year && filters.semester && filters.section) {
+      if (selectedBranch) {
+        try {
+          const response = await axios.get(
+            `http://localhost:3000/api/students?branch=${selectedBranch}&year=${filters.year}&semester=${filters.semester}&section=${filters.section}`
+          );
+          setStudents(response.data); // Update with students from backend
+        } catch (error) {
+          console.error("Error fetching students:", error);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (submitted) fetchStudents(); // Fetch students on form submission
+  }, [submitted]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitted(false); // Reset submitted state to allow refetching students
+    await fetchStudents(); // Fetch students again from the backend
+    setSubmitted(true); // Set submitted to true to render the students table
   };
 
   const handleAttendanceChange = (index, value) => {
@@ -22,12 +47,19 @@ const Attendance = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
-      <form className="bg-white shadow-md rounded-lg p-6 mb-8 w-full max-w-2xl" onSubmit={handleSubmit}>
+      <form
+        className="bg-white shadow-md rounded-lg p-6 mb-8 w-full max-w-2xl"
+        onSubmit={handleSubmit}
+      >
         <h2 className="text-2xl font-semibold mb-4">Attendance Entry</h2>
 
         {/* Dropdowns */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <select className="border p-2 rounded">
+          <select
+            className="border p-2 rounded"
+            value={filters.year}
+            onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+          >
             <option value="">Select Year</option>
             <option value="1">1st Year</option>
             <option value="2">2nd Year</option>
@@ -35,20 +67,38 @@ const Attendance = () => {
             <option value="4">4th Year</option>
           </select>
 
-          <select className="border p-2 rounded">
+          <select
+            className="border p-2 rounded"
+            value={filters.semester}
+            onChange={(e) =>
+              setFilters({ ...filters, semester: e.target.value })
+            }
+          >
             <option value="">Select Semester</option>
             <option value="1">1st Semester</option>
             <option value="2">2nd Semester</option>
           </select>
 
-          <select className="border p-2 rounded">
+          <select
+            className="border p-2 rounded"
+            value={filters.section}
+            onChange={(e) =>
+              setFilters({ ...filters, section: e.target.value })
+            }
+          >
             <option value="">Select Section</option>
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
 
-          <select className="border p-2 rounded">
+          <select
+            className="border p-2 rounded"
+            value={filters.subject}
+            onChange={(e) =>
+              setFilters({ ...filters, subject: e.target.value })
+            }
+          >
             <option value="">Select Subject</option>
             <option value="Math">Math</option>
             <option value="Physics">Physics</option>
@@ -73,13 +123,16 @@ const Attendance = () => {
         />
 
         {/* Submit button */}
-        <button type="submit" className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <button
+          type="submit"
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
           Enter
         </button>
       </form>
 
       {/* Conditionally render the table after form submission */}
-      {submitted && (
+      {submitted && students.length > 0 && (
         <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl">
           <h2 className="text-2xl font-semibold mb-4">Enter Attendance</h2>
           <table className="min-w-full bg-white">
@@ -93,8 +146,8 @@ const Attendance = () => {
             </thead>
             <tbody>
               {students.map((student, index) => (
-                <tr key={student.sNo}>
-                  <td className="py-2 border text-center">{student.sNo}</td>
+                <tr key={student.rollNo}>
+                  <td className="py-2 border text-center">{index + 1}</td>
                   <td className="py-2 border text-center">{student.rollNo}</td>
                   <td className="py-2 border text-center">{student.name}</td>
                   <td className="py-2 border text-center">
@@ -102,7 +155,9 @@ const Attendance = () => {
                       type="number"
                       className="border p-2 rounded w-full"
                       value={student.classesAttended}
-                      onChange={(e) => handleAttendanceChange(index, e.target.value)}
+                      onChange={(e) =>
+                        handleAttendanceChange(index, e.target.value)
+                      }
                     />
                   </td>
                 </tr>
@@ -112,8 +167,12 @@ const Attendance = () => {
 
           {/* Save and Submit buttons */}
           <div className="mt-4 flex justify-end space-x-4">
-            <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save</button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Submit</button>
+            <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+              Save
+            </button>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Submit
+            </button>
           </div>
         </div>
       )}
