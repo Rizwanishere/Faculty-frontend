@@ -10,6 +10,7 @@ const Attendance = () => {
     semester: "",
     section: "",
     subject: "",
+    period: "",
   });
   const selectedBranch = localStorage.getItem("selectedBranch"); // Get branch from storage
 
@@ -18,7 +19,7 @@ const Attendance = () => {
       if (selectedBranch) {
         try {
           const response = await axios.get(
-            `http://localhost:3000/api/students?branch=${selectedBranch}&year=${filters.year}&semester=${filters.semester}&section=${filters.section}`
+            `http://localhost:3000/api/students/filtered?branch=${selectedBranch}&year=${filters.year}&semester=${filters.semester}&section=${filters.section}&subjectId=${filters.subject}&period=${filters.period}`
           );
           setStudents(response.data); // Update with students from backend
         } catch (error) {
@@ -100,12 +101,18 @@ const Attendance = () => {
             }
           >
             <option value="">Select Subject</option>
-            <option value="Math">Math</option>
-            <option value="Physics">Physics</option>
-            <option value="Chemistry">Chemistry</option>
+            <option value="670c1907a98ffba835b66d33">CD</option>
+            <option value="670c192aa98ffba835b66d35">CN</option>
+            <option value="670c1935a98ffba835b66d37">AI</option>
+            <option value="670c193aa98ffba835b66d39">BEFA</option>
+            <option value="670c1944a98ffba835b66d3b">RSE</option>
           </select>
 
-          <select className="border p-2 rounded">
+          <select
+            value={filters.period}
+            onChange={(e) => setFilters({ ...filters, period: e.target.value })}
+            className="border p-2 rounded"
+          >
             <option value="">Select Attendance Date</option>
             <option value="15th">Up to 15th</option>
             <option value="30th">Up to 30th</option>
@@ -151,25 +158,24 @@ const Attendance = () => {
                   <td className="py-2 border text-center">{student.rollNo}</td>
                   <td className="py-2 border text-center">{student.name}</td>
                   <td className="py-2 border text-center">
-                    <input
-                      type="number"
-                      className="border p-2 rounded w-full"
-                      value={student.classesAttended}
-                      onChange={(e) =>
-                        handleAttendanceChange(index, e.target.value)
-                      }
-                    />
+                    {student.attendance.length > 0 && (
+                      <input
+                        type="number"
+                        className="border p-2 rounded w-full"
+                        value={student.attendance[0].classesAttended || 0}
+                        onChange={(e) =>
+                          handleAttendanceChange(index, e.target.value)
+                        }
+                      />
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {/* Save and Submit buttons */}
+          {/* Save button */}
           <div className="mt-4 flex justify-end space-x-4">
-            <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-              Save
-            </button>
             <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
               Submit
             </button>
