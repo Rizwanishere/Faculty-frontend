@@ -45,11 +45,32 @@ const Attendance = () => {
 
     // Ensure that `attendance` array exists before updating
     if (!updatedStudents[index].attendance) {
-      updatedStudents[index].attendance = [{ classesAttended: 0 }];
+      updatedStudents[index].attendance = [];
+    }
+
+    // Ensure that `attendance[0]` exists and is initialized
+    if (!updatedStudents[index].attendance[0]) {
+      updatedStudents[index].attendance[0] = { classesAttended: 0 };
     }
 
     updatedStudents[index].attendance[0].classesAttended = value;
     setStudents(updatedStudents);
+  };
+
+  const handleSaveEmptyAttendance = async (studentId, classesAttended) => {
+    try {
+      await axios.post(`http://localhost:3000/api/students/attendance`, {
+        student: studentId,
+        subject: filters.subject,
+        totalClasses: totalClasses,
+        classesAttended: classesAttended,
+        period: filters.period,
+      });
+      alert("Attendance created successfully");
+    } catch (error) {
+      console.error("Error creating attendance:", error);
+      alert("Failed to create attendance");
+    }
   };
 
   const handleSave = async () => {
@@ -58,17 +79,22 @@ const Attendance = () => {
         if (student.attendance && student.attendance.length > 0) {
           const { _id, attendance } = student;
 
-          // Make PUT request to update attendance for each student
-          await axios.put(
-            `http://localhost:3000/api/students/attendance/${student.attendance[0]._id}`,
-            {
-              student: _id,
-              subject: filters.subject,
-              totalClasses: totalClasses,
-              classesAttended: attendance[0].classesAttended,
-              period: filters.period,
-            }
-          );
+          if (attendance[0]._id) {
+            // Make PUT request to update attendance
+            await axios.put(
+              `http://localhost:3000/api/students/attendance/${attendance[0]._id}`,
+              {
+                student: _id,
+                subject: filters.subject,
+                totalClasses: totalClasses,
+                classesAttended: attendance[0].classesAttended,
+                period: filters.period,
+              }
+            );
+          } else {
+            // If no attendance ID, make POST request to create a new attendance
+            await handleSaveEmptyAttendance(_id, attendance[0].classesAttended);
+          }
         }
       }
       alert("Attendance updated successfully");
@@ -193,7 +219,7 @@ const Attendance = () => {
                     <input
                       type="number"
                       className="border p-2 rounded w-full"
-                      value={student.attendance?.[0]?.classesAttended}
+                      value={student.attendance?.[0]?.classesAttended || ""}
                       onChange={(e) =>
                         handleAttendanceChange(index, e.target.value)
                       }
