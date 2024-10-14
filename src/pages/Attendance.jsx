@@ -17,13 +17,15 @@ const Attendance = () => {
 
   // Fetch subjects from backend
   const fetchSubjects = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/subjects/branch/${selectedBranch}`
-      );
-      setSubjects(response.data);
-    } catch (error) {
-      console.error("Error fetching subjects:", error);
+    if (filters.year && filters.semester) {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/subjects/branch/${selectedBranch}/year/${filters.year}/semester/${filters.semester}`
+        );
+        setSubjects(response.data);
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+      }
     }
   };
 
@@ -43,8 +45,9 @@ const Attendance = () => {
   };
 
   useEffect(() => {
-    fetchSubjects(); // Fetch subjects when component mounts
-  }, []);
+    // Fetch subjects when year and semester change
+    fetchSubjects();
+  }, [filters.year, filters.semester]); // Triggers when either year or semester is updated
 
   useEffect(() => {
     if (submitted) fetchStudents();
