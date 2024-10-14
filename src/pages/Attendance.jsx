@@ -12,7 +12,7 @@ const Attendance = () => {
     subject: "",
     period: "",
   });
-  const selectedBranch = localStorage.getItem("selectedBranch"); // Get branch from storage
+  const selectedBranch = localStorage.getItem("selectedBranch");
 
   const fetchStudents = async () => {
     if (filters.year && filters.semester && filters.section) {
@@ -21,7 +21,7 @@ const Attendance = () => {
           const response = await axios.get(
             `http://localhost:3000/api/students/filtered?branch=${selectedBranch}&year=${filters.year}&semester=${filters.semester}&section=${filters.section}&subjectId=${filters.subject}&period=${filters.period}`
           );
-          setStudents(response.data); // Update with students from backend
+          setStudents(response.data);
         } catch (error) {
           console.error("Error fetching students:", error);
         }
@@ -30,20 +30,52 @@ const Attendance = () => {
   };
 
   useEffect(() => {
-    if (submitted) fetchStudents(); // Fetch students on form submission
+    if (submitted) fetchStudents();
   }, [submitted]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(false); // Reset submitted state to allow refetching students
-    await fetchStudents(); // Fetch students again from the backend
-    setSubmitted(true); // Set submitted to true to render the students table
+    setSubmitted(false);
+    await fetchStudents();
+    setSubmitted(true);
   };
 
   const handleAttendanceChange = (index, value) => {
     const updatedStudents = [...students];
-    updatedStudents[index].classesAttended = value;
+
+    // Ensure that `attendance` array exists before updating
+    if (!updatedStudents[index].attendance) {
+      updatedStudents[index].attendance = [{ classesAttended: 0 }];
+    }
+
+    updatedStudents[index].attendance[0].classesAttended = value;
     setStudents(updatedStudents);
+  };
+
+  const handleSave = async () => {
+    try {
+      for (let student of students) {
+        if (student.attendance && student.attendance.length > 0) {
+          const { _id, attendance } = student;
+
+          // Make PUT request to update attendance for each student
+          await axios.put(
+            `http://localhost:3000/api/students/attendance/${student.attendance[0]._id}`,
+            {
+              student: _id,
+              subject: filters.subject,
+              totalClasses: totalClasses,
+              classesAttended: attendance[0].classesAttended,
+              period: filters.period,
+            }
+          );
+        }
+      }
+      alert("Attendance updated successfully");
+    } catch (error) {
+      console.error("Error updating attendance:", error);
+      alert("Failed to update attendance");
+    }
   };
 
   return (
@@ -158,16 +190,14 @@ const Attendance = () => {
                   <td className="py-2 border text-center">{student.rollNo}</td>
                   <td className="py-2 border text-center">{student.name}</td>
                   <td className="py-2 border text-center">
-                    {student.attendance.length > 0 && (
-                      <input
-                        type="number"
-                        className="border p-2 rounded w-full"
-                        value={student.attendance[0].classesAttended || 0}
-                        onChange={(e) =>
-                          handleAttendanceChange(index, e.target.value)
-                        }
-                      />
-                    )}
+                    <input
+                      type="number"
+                      className="border p-2 rounded w-full"
+                      value={student.attendance?.[0]?.classesAttended}
+                      onChange={(e) =>
+                        handleAttendanceChange(index, e.target.value)
+                      }
+                    />
                   </td>
                 </tr>
               ))}
@@ -176,7 +206,10 @@ const Attendance = () => {
 
           {/* Save button */}
           <div className="mt-4 flex justify-end space-x-4">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={handleSave}
+            >
               Submit
             </button>
           </div>
