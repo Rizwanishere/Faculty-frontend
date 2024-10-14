@@ -105,6 +105,73 @@ const Marks = () => {
     }
   };
 
+  // Handle form submission
+  // Handle Save Marks
+  const handleSave = async () => {
+    try {
+      for (let student of students) {
+        const { _id, marks } = student;
+
+        // Check if marks entry exists
+        if (marks) {
+          const existingMarkEntry = await axios.get(
+            `http://localhost:3000/api/marks/${selectedSubject}/${examType}`
+          );
+
+          const markEntryToUpdate = existingMarkEntry.data.find(
+            (mark) => mark.student._id === _id
+          );
+
+          if (markEntryToUpdate) {
+            // Make PUT request to update existing marks
+            await axios.put(
+              `http://localhost:3000/api/marks/${selectedSubject}/${examType}/${markEntryToUpdate._id}`,
+              {
+                student: _id,
+                subject: selectedSubject,
+                examType: examType,
+                marks: marks, // Updated marks
+                maxMarks: maxMarks,
+                regulation: "LR21", // You can change this to whatever regulation you want
+                year: selectedYear,
+                semester: selectedSemester,
+                section: selectedSection,
+              }
+            );
+          } else {
+            // Create a new marks entry if it doesn't exist
+            await handleSaveNewMarks(_id, marks);
+          }
+        }
+      }
+      alert("Marks updated successfully");
+    } catch (error) {
+      console.error("Error updating marks:", error);
+      alert("Failed to update marks");
+    }
+  };
+
+  // Handle saving new marks for a student
+  const handleSaveNewMarks = async (studentId, marks) => {
+    try {
+      await axios.post(`http://localhost:3000/api/marks`, {
+        student: studentId,
+        subject: selectedSubject,
+        examType: examType,
+        marks: marks,
+        maxMarks: maxMarks,
+        regulation: selectedRegulation, // You can change this to whatever regulation you want
+        year: selectedYear,
+        semester: selectedSemester,
+        section: selectedSection,
+      });
+      alert("Marks created successfully");
+    } catch (error) {
+      console.error("Error creating marks:", error);
+      alert("Failed to create marks");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
       <form
@@ -244,6 +311,16 @@ const Marks = () => {
               ))}
             </tbody>
           </table>
+
+          {/* Save button */}
+          <div className="mt-4 flex justify-end space-x-4">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={handleSave}
+            >
+              Submit
+            </button>
+          </div>
         </div>
       )}
     </div>
