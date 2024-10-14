@@ -5,6 +5,7 @@ const Attendance = () => {
   const [submitted, setSubmitted] = useState(false);
   const [totalClasses, setTotalClasses] = useState("");
   const [students, setStudents] = useState([]);
+  const [subjects, setSubjects] = useState([]); // State to store subjects
   const [filters, setFilters] = useState({
     year: "",
     semester: "",
@@ -13,6 +14,18 @@ const Attendance = () => {
     period: "",
   });
   const selectedBranch = localStorage.getItem("selectedBranch");
+
+  // Fetch subjects from backend
+  const fetchSubjects = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/subjects/branch/${selectedBranch}`
+      );
+      setSubjects(response.data);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+    }
+  };
 
   const fetchStudents = async () => {
     if (filters.year && filters.semester && filters.section) {
@@ -28,6 +41,10 @@ const Attendance = () => {
       }
     }
   };
+
+  useEffect(() => {
+    fetchSubjects(); // Fetch subjects when component mounts
+  }, []);
 
   useEffect(() => {
     if (submitted) fetchStudents();
@@ -159,11 +176,12 @@ const Attendance = () => {
             }
           >
             <option value="">Select Subject</option>
-            <option value="670c1907a98ffba835b66d33">CD</option>
-            <option value="670c192aa98ffba835b66d35">CN</option>
-            <option value="670c1935a98ffba835b66d37">AI</option>
-            <option value="670c193aa98ffba835b66d39">BEFA</option>
-            <option value="670c1944a98ffba835b66d3b">RSE</option>
+            {/* Dynamically render subjects */}
+            {subjects.map((subject) => (
+              <option key={subject._id} value={subject._id}>
+                {subject.name}
+              </option>
+            ))}
           </select>
 
           <select
