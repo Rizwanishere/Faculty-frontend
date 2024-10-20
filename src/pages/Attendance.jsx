@@ -14,6 +14,24 @@ const Attendance = () => {
     period: "",
   });
   const selectedBranch = localStorage.getItem("selectedBranch");
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  // Fetch attendance from the backend
+  const fetchAttendance = async () => {
+    const currentDate = new Date();
+    const month = currentDate.getMonth() + 1; // Months are 0-based
+    const year = currentDate.getFullYear();
+
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/students/attendance/month/${month}/year/${year}`
+      );
+      console.log("Attendance Data:", response.data);
+      setAttendanceData(response.data); // Assuming `attendanceData` is a state variable to hold the attendance data
+    } catch (error) {
+      console.error("Error fetching attendance:", error);
+    }
+  };
 
   // Fetch subjects from backend
   const fetchSubjects = async () => {
@@ -47,6 +65,7 @@ const Attendance = () => {
   useEffect(() => {
     // Fetch subjects when year and semester change
     fetchSubjects();
+    fetchAttendance();
   }, [filters.year, filters.semester]); // Triggers when either year or semester is updated
 
   useEffect(() => {
@@ -60,20 +79,32 @@ const Attendance = () => {
     setSubmitted(true);
   };
 
+  // Handle attendance change
   const handleAttendanceChange = (index, value) => {
     const updatedStudents = [...students];
 
-    // Ensure that `attendance` array exists before updating
-    if (!updatedStudents[index].attendance) {
-      updatedStudents[index].attendance = [];
+    // Ensure that the student exists
+    if (!updatedStudents[index]) {
+      console.error("Student not found at index:", index);
+      return; // Exit if student is not found
     }
 
-    // Ensure that `attendance[0]` exists and is initialized
+    // Initialize attendance array if it doesn't exist
+    if (!updatedStudents[index].attendance) {
+      updatedStudents[index].attendance = [{ classesAttended: 0 }];
+    }
+
+    // Check if attendance[0] exists and initialize it if it doesn't
     if (!updatedStudents[index].attendance[0]) {
       updatedStudents[index].attendance[0] = { classesAttended: 0 };
     }
 
-    updatedStudents[index].attendance[0].classesAttended = value;
+    // Update classesAttended safely, handle empty value case
+    updatedStudents[index].attendance[0].classesAttended = value
+      ? Number(value)
+      : null; // Set to null if the input is empty
+
+    // Update the state with the modified students array
     setStudents(updatedStudents);
   };
 
@@ -243,23 +274,41 @@ const Attendance = () => {
               </tr>
             </thead>
             <tbody>
-              {students.map((student, index) => (
-                <tr key={student.rollNo}>
-                  <td className="py-2 border text-center">{index + 1}</td>
-                  <td className="py-2 border text-center">{student.rollNo}</td>
-                  <td className="py-2 border text-center">{student.name}</td>
-                  <td className="py-2 border text-center">
-                    <input
-                      type="number"
-                      className="border p-2 rounded w-full"
-                      value={student.attendance?.[0]?.classesAttended || ""}
-                      onChange={(e) =>
-                        handleAttendanceChange(index, e.target.value)
-                      }
-                    />
-                  </td>
-                </tr>
-              ))}
+              {students.map((student, index) => {
+                // Find the attendance record for the current student
+                const attendanceRecord = attendanceData.find(
+                  (data) => data.student === student._id
+                );
+
+                // Set initial classes attended from attendance record if available
+                const classesAttended = attendanceRecord
+                  ? attendanceRecord.classesAttended
+                  : 0; // Default to 0 if no record found
+
+                // Use student's current attendance or the default value
+                const currentClassesAttended =
+                  student.attendance?.[0]?.classesAttended || classesAttended;
+
+                return (
+                  <tr key={student._id}>
+                    <td className="py-2 border text-center">{index + 1}</td>
+                    <td className="py-2 border text-center">
+                      {student.rollNo}
+                    </td>
+                    <td className="py-2 border text-center">{student.name}</td>
+                    <td className="py-2 border text-center">
+                      <input
+                        type="number"
+                        className="border p-2 rounded w-full"
+                        value={currentClassesAttended || ""} // Use the computed value here
+                        onChange={(e) =>
+                          handleAttendanceChange(index, e.target.value)
+                        }
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
@@ -279,3 +328,4 @@ const Attendance = () => {
 };
 
 export default Attendance;
+// BUG: the attendance of period 30th is being rendered in table even if period 15th selected
