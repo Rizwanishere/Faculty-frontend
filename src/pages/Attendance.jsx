@@ -21,15 +21,16 @@ const Attendance = () => {
     const currentDate = new Date();
     const month = currentDate.getMonth() + 1; // Months are 0-based
     const year = currentDate.getFullYear();
-
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/students/attendance/month/${month}/year/${year}`
-      );
-      console.log("Attendance Data:", response.data);
-      setAttendanceData(response.data); // Assuming `attendanceData` is a state variable to hold the attendance data
-    } catch (error) {
-      console.error("Error fetching attendance:", error);
+    if (filters.period) {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/students/attendance/month/${month}/year/${year}/period/${filters.period}`
+        );
+        console.log("Attendance Data:", response.data);
+        setAttendanceData(response.data); // Assuming `attendanceData` is a state variable to hold the attendance data
+      } catch (error) {
+        console.error("Error fetching attendance:", error);
+      }
     }
   };
 
@@ -328,4 +329,3 @@ const Attendance = () => {
 };
 
 export default Attendance;
-// BUG: the attendance of period 30th is being rendered in table even if period 15th selected
