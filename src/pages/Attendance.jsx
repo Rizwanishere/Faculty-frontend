@@ -78,6 +78,10 @@ const Attendance = () => {
   };
 
   const handleSaveEmptyAttendance = async (studentId, classesAttended) => {
+    const currentDate = new Date();
+    const month = currentDate.getMonth() + 1; // Months are 0-based
+    const year = currentDate.getFullYear();
+
     try {
       await axios.post(`http://localhost:3000/api/students/attendance`, {
         student: studentId,
@@ -85,6 +89,8 @@ const Attendance = () => {
         totalClasses: totalClasses,
         classesAttended: classesAttended,
         period: filters.period,
+        month: month,
+        year: year,
       });
       alert("Attendance created successfully");
     } catch (error) {
@@ -94,6 +100,10 @@ const Attendance = () => {
   };
 
   const handleSave = async () => {
+    const currentDate = new Date();
+    const month = currentDate.getMonth() + 1; // Months are 0-based
+    const year = currentDate.getFullYear();
+
     try {
       for (let student of students) {
         if (student.attendance && student.attendance.length > 0) {
@@ -109,6 +119,8 @@ const Attendance = () => {
                 totalClasses: totalClasses,
                 classesAttended: attendance[0].classesAttended,
                 period: filters.period,
+                month: month,
+                year: year,
               }
             );
           } else {
