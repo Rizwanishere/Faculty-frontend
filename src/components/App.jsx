@@ -11,6 +11,8 @@ import ScrollToTop from "../utils/ScrollToTop";
 import Attendance from "../pages/Attendance";
 import Marks from "../pages/Marks";
 import PostStudent from "../pages/PostStudent";
+import ReportsPage from "../pages/ReportsPage";
+import MarksReports from "../pages/MarksReports"
 
 const App = () => {
   const selectedBranch = localStorage.getItem('selectedBranch'); // Check if branch is selected
@@ -30,6 +32,10 @@ const App = () => {
         {/* Routes for Attendance and Marks are now accessible without login */}
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/marks" element={<Marks />} />
+        <Route path="/reports" element={<ReportsPage />} />
+
+        <Route path="/reports/marks" element={<MarksReports />} />
+
 
         <Route path="/poststudent" element={<PostStudent />} />
 

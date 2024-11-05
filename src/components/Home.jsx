@@ -35,9 +35,11 @@ const Home = () => {
           <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Reports</h2>
             <p className="text-gray-600">View and generate reports for marks and attendance.</p>
-            <button className="mt-4 px-4 py-2 bg-primary text-white rounded">
-              Go to Reports
-            </button>
+            <Link to="/reports">
+              <button className="mt-4 px-4 py-2 bg-primary text-white rounded">
+                Go to Reports
+              </button>
+            </Link>
           </div>
 
         </div>
