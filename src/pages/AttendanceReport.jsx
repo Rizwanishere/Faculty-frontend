@@ -122,7 +122,7 @@ const AttendanceEntry = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
       <form className="bg-white shadow-md rounded-lg p-6 mb-8 w-full max-w-2xl">
-        <h2 className="text-2xl font-semibold mb-4">Attendance Entry</h2>
+        <h2 className="text-2xl font-semibold mb-4">Attendance Report</h2>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Year Dropdown */}
@@ -171,8 +171,15 @@ const AttendanceEntry = () => {
             <option value="1">January</option>
             <option value="2">February</option>
             <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
             <option value="10">October</option>
-            {/* Add other months */}
+            <option value="11">November</option>
+            <option value="12">December</option>
           </select>
 
           {/* Year for Attendance */}
