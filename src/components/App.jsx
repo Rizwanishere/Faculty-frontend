@@ -6,9 +6,14 @@ import Home from "./Home";
 import Header from "./Header";
 import Footer from "./Footer";
 import BranchSelection from '../pages/BranchSelection';
+import Login from '../pages/Login';
 import ScrollToTop from "../utils/ScrollToTop";
 import Attendance from "../pages/Attendance";
 import Marks from "../pages/Marks";
+import PostStudent from "../pages/PostStudent";
+import ReportsPage from "../pages/ReportsPage";
+import MarksReport from "../pages/MarksReport"
+import AttendanceReport from "../pages/AttendanceReport";
 
 const App = () => {
   const selectedBranch = localStorage.getItem('selectedBranch'); // Check if branch is selected
@@ -17,14 +22,24 @@ const App = () => {
       <Header />
       <Routes>
         {/* If no branch selected, show BranchSelection as the default route */}
-        <Route path="/" element={selectedBranch ? <Navigate to="/home" /> : <BranchSelection />} />
-        
-        {/* Route to Home after branch selection */}
+        <Route path="/" element={selectedBranch ? <Navigate to="/login" /> : <BranchSelection />} />
+
+        {/* Route to Login after branch selection */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Route to home after login */}
         <Route path="/home" element={<Home />} />
 
-        {/* Nested routes for Attendance, MarksEntry, and Reports */}
+        {/* Routes for Attendance and Marks are now accessible without login */}
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/marks" element={<Marks />} />
+        <Route path="/reports" element={<ReportsPage />} />
+
+        <Route path="/reports/marks" element={<MarksReport />} />
+        <Route path="/reports/attendance" element={<AttendanceReport />} />
+
+
+        <Route path="/poststudent" element={<PostStudent />} />
 
         {/* Redirect any unknown path to the root (Branch Selection) */}
         <Route path="*" element={<Navigate to="/" />} />

@@ -16,12 +16,14 @@ const BranchSelection = () => {
     <div className="min-h-screen flex flex-col items-center justify-center">
       <h2 className="text-2xl font-semibold mb-4">Select Branch</h2>
       <select
-        className="border p-2 rounded"
+        className="border border-black rounded-xl w-1/4 p-2 rounded"
         value={branch}
         onChange={(e) => setBranch(e.target.value)}
       >
         <option value="">Select Branch</option>
         <option value="CSE">CSE</option>
+        <option value="IT">IT</option>
+        <option value="ECE">ECE</option>
         {/* Add more branches as needed */}
       </select>
       <button
