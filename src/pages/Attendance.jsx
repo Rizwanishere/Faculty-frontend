@@ -67,7 +67,7 @@ const Attendance = () => {
     // Fetch subjects when year and semester change
     fetchSubjects();
     fetchAttendance();
-  }, [filters.year, filters.semester]); // Triggers when either year or semester is updated
+  }, [filters.year, filters.semester, filters.period]); // Triggers when either year, semester, or period is updated
 
   useEffect(() => {
     if (submitted) fetchStudents();
@@ -80,91 +80,117 @@ const Attendance = () => {
     setSubmitted(true);
   };
 
-  // Handle attendance change
-  const handleAttendanceChange = (index, value) => {
-    const updatedStudents = [...students];
+  // Handle attendance change for each student by updating attendanceData
+  const handleAttendanceChange = (studentId, value) => {
+    const updatedAttendanceData = attendanceData.map((record) => {
+      if (record.student === studentId && record.subject === filters.subject) {
+        // Update classesAttended for the matching record
+        return {
+          ...record,
+          classesAttended: value ? Number(value) : "",
+        };
+      }
+      return record;
+    });
 
-    // Ensure that the student exists
-    if (!updatedStudents[index]) {
-      console.error("Student not found at index:", index);
-      return; // Exit if student is not found
+    // Check if the student has an attendance record for the current subject
+    const studentHasAttendance = updatedAttendanceData.some(
+      (record) =>
+        record.student === studentId && record.subject === filters.subject
+    );
+
+    // If no record exists, create a new entry
+    if (!studentHasAttendance && value !== "") {
+      updatedAttendanceData.push({
+        student: studentId,
+        subject: filters.subject,
+        classesAttended: value ? Number(value) : "",
+      });
     }
 
-    // Initialize attendance array if it doesn't exist
-    if (!updatedStudents[index].attendance) {
-      updatedStudents[index].attendance = [{ classesAttended: 0 }];
-    }
-
-    // Check if attendance[0] exists and initialize it if it doesn't
-    if (!updatedStudents[index].attendance[0]) {
-      updatedStudents[index].attendance[0] = { classesAttended: 0 };
-    }
-
-    // Update classesAttended safely, handle empty value case
-    updatedStudents[index].attendance[0].classesAttended = value
-      ? Number(value)
-      : null; // Set to null if the input is empty
-
-    // Update the state with the modified students array
-    setStudents(updatedStudents);
+    setAttendanceData(updatedAttendanceData);
   };
 
-  const handleSaveEmptyAttendance = async (studentId, classesAttended) => {
+  const handleSave = async () => {
+    console.log("Attendance Data before processing:", attendanceData);
     const currentDate = new Date();
     const month = currentDate.getMonth() + 1; // Months are 0-based
     const year = currentDate.getFullYear();
 
     try {
-      await axios.post(`http://localhost:3000/api/students/attendance`, {
-        student: studentId,
-        subject: filters.subject,
-        totalClasses: totalClasses,
-        classesAttended: classesAttended,
-        period: filters.period,
-        month: month,
-        year: year,
-      });
+      for (let record of attendanceData) {
+        const { student, _id, classesAttended, subject } = record;
+        console.log("Processing record:", record); // Check the individual record
+
+        // Check if subject and student match the filter
+        if (subject === filters.subject) {
+          if (_id) {
+            // If _id exists, do PUT (update)
+            console.log("Attempting to update attendance:", record); // Check PUT request
+            const response = await axios.put(
+              `http://localhost:3000/api/students/attendance/${_id}`,
+              {
+                student,
+                subject,
+                totalClasses, // Assuming this is a predefined variable
+                classesAttended,
+                period: filters.period,
+                month,
+                year,
+              }
+            );
+            console.log("PUT request response:", response); // Verify response
+          } else {
+            // If no _id, it means this is a new attendance record
+            console.log(
+              "Attempting to create new attendance for student:",
+              student
+            );
+            await handleSaveEmptyAttendance(student, classesAttended, subject);
+          }
+        } else {
+          console.log(
+            "Skipping record, subject does not match filter:",
+            record
+          );
+        }
+      }
+      alert("Attendance process completed successfully");
+    } catch (error) {
+      console.error("Error saving attendance:", error);
+      alert("Failed to save attendance");
+    }
+  };
+
+  // Ensure handleSaveEmptyAttendance only creates new records
+  const handleSaveEmptyAttendance = async (
+    studentId,
+    classesAttended,
+    subject
+  ) => {
+    const currentDate = new Date();
+    const month = currentDate.getMonth() + 1; // Months are 0-based
+    const year = currentDate.getFullYear();
+
+    try {
+      console.log("Creating new attendance for student:", studentId); // Check if this is triggered
+      const response = await axios.post(
+        `http://localhost:3000/api/students/attendance`,
+        {
+          student: studentId,
+          subject: subject,
+          totalClasses: totalClasses, // Ensure totalClasses is set
+          classesAttended: classesAttended,
+          period: filters.period,
+          month: month,
+          year: year,
+        }
+      );
+      console.log("POST request response:", response); // Check POST response
       alert("Attendance created successfully");
     } catch (error) {
       console.error("Error creating attendance:", error);
       alert("Failed to create attendance");
-    }
-  };
-
-  const handleSave = async () => {
-    const currentDate = new Date();
-    const month = currentDate.getMonth() + 1; // Months are 0-based
-    const year = currentDate.getFullYear();
-
-    try {
-      for (let student of students) {
-        if (student.attendance && student.attendance.length > 0) {
-          const { _id, attendance } = student;
-
-          if (attendance[0]._id) {
-            // Make PUT request to update attendance
-            await axios.put(
-              `http://localhost:3000/api/students/attendance/${attendance[0]._id}`,
-              {
-                student: _id,
-                subject: filters.subject,
-                totalClasses: totalClasses,
-                classesAttended: attendance[0].classesAttended,
-                period: filters.period,
-                month: month,
-                year: year,
-              }
-            );
-          } else {
-            // If no attendance ID, make POST request to create a new attendance
-            await handleSaveEmptyAttendance(_id, attendance[0].classesAttended);
-          }
-        }
-      }
-      alert("Attendance updated successfully");
-    } catch (error) {
-      console.error("Error updating attendance:", error);
-      alert("Failed to update attendance");
     }
   };
 
@@ -263,47 +289,41 @@ const Attendance = () => {
 
       {/* Conditionally render the table after form submission */}
       {submitted && students.length > 0 && (
-        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl">
-          <h2 className="text-2xl font-semibold mb-4">Enter Attendance</h2>
-          <table className="min-w-full bg-white">
+        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-6xl">
+          <h3 className="text-xl font-semibold mb-4">Attendance Table</h3>
+
+          <table className="table-auto w-full border border-2">
             <thead>
               <tr>
-                <th className="py-2 border">S.No</th>
-                <th className="py-2 border">Roll No</th>
-                <th className="py-2 border">Name</th>
-                <th className="py-2 border">Classes Attended</th>
+                <th className="border px-4 py-2">S No</th>
+                <th className="border px-4 py-2">Roll No</th>
+                <th className="border px-4 py-2">Student Name</th>
+                <th className="border px-4 py-2">Classes Attended</th>
               </tr>
             </thead>
             <tbody>
-              {students.map((student, index) => {
-                // Find the attendance record for the current student
+              {students.map((student) => {
+                // Get the matching attendance record for the student and subject
                 const attendanceRecord = attendanceData.find(
-                  (data) => data.student === student._id
+                  (record) =>
+                    record.student === student._id &&
+                    record.subject === filters.subject
                 );
-
-                // Set initial classes attended from attendance record if available
-                const classesAttended = attendanceRecord
-                  ? attendanceRecord.classesAttended
-                  : 0; // Default to 0 if no record found
-
-                // Use student's current attendance or the default value
-                const currentClassesAttended =
-                  student.attendance?.[0]?.classesAttended || classesAttended;
-
                 return (
                   <tr key={student._id}>
-                    <td className="py-2 border text-center">{index + 1}</td>
-                    <td className="py-2 border text-center">
-                      {student.rollNo}
-                    </td>
-                    <td className="py-2 border text-center">{student.name}</td>
-                    <td className="py-2 border text-center">
+                    <td className="border px-4 py-2">{1}</td>
+                    <td className="border px-4 py-2">{student.rollNo}</td>
+                    <td className="border px-4 py-2">{student.name}</td>
+                    <td className="border px-4 py-2">
                       <input
                         type="number"
                         className="border p-2 rounded w-full"
-                        value={currentClassesAttended || ""} // Use the computed value here
+                        placeholder="Enter classes attended"
+                        value={
+                          attendanceRecord?.classesAttended || "" // Show existing value if available, else empty
+                        }
                         onChange={(e) =>
-                          handleAttendanceChange(index, e.target.value)
+                          handleAttendanceChange(student._id, e.target.value)
                         }
                       />
                     </td>
@@ -314,14 +334,12 @@ const Attendance = () => {
           </table>
 
           {/* Save button */}
-          <div className="mt-4 flex justify-end space-x-4">
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={handleSave}
-            >
-              Submit
-            </button>
-          </div>
+          <button
+            onClick={handleSave}
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Save Attendance
+          </button>
         </div>
       )}
     </div>
