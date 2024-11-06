@@ -220,20 +220,15 @@ const AttendanceEntry = () => {
 
                 {/* Calculate totalClasses combined for all unique subjects */}
                 <th className="py-2 border">
-                  Total <br />({""}
-                  {[
-                    ...new Set(
-                      subjectOptions.map((subject) => {
-                        const totalClasses =
-                          attendanceData.find(
-                            (att) => att.subject === subject._id
-                          )?.totalClasses || 0;
-                        return totalClasses;
-                      })
-                    ),
-                  ].reduce((sum, value) => sum + value, 0)}
-                  )
+                  Total <br />
+                  ({subjectOptions.reduce((sum, subject) => {
+                    const totalClassesForSubject =
+                      attendanceData.find((att) => att.subject === subject._id)
+                        ?.totalClasses || 0;
+                    return sum + Number(totalClassesForSubject);
+                  }, 0)})
                 </th>
+
                 <th className="py-2 border">Percentage</th>
               </tr>
             </thead>
