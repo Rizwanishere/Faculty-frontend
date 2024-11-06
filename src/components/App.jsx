@@ -12,7 +12,8 @@ import Attendance from "../pages/Attendance";
 import Marks from "../pages/Marks";
 import PostStudent from "../pages/PostStudent";
 import ReportsPage from "../pages/ReportsPage";
-import MarksReports from "../pages/MarksReports"
+import MarksReport from "../pages/MarksReport"
+import AttendanceReport from "../pages/AttendanceReport";
 
 const App = () => {
   const selectedBranch = localStorage.getItem('selectedBranch'); // Check if branch is selected
@@ -34,7 +35,8 @@ const App = () => {
         <Route path="/marks" element={<Marks />} />
         <Route path="/reports" element={<ReportsPage />} />
 
-        <Route path="/reports/marks" element={<MarksReports />} />
+        <Route path="/reports/marks" element={<MarksReport />} />
+        <Route path="/reports/attendance" element={<AttendanceReport />} />
 
 
         <Route path="/poststudent" element={<PostStudent />} />
