@@ -89,11 +89,33 @@ const AttendanceEntry = () => {
       const attendanceRecord = studentAttendance.find(
         (att) => att.subject === subject._id
       );
-      return attendanceRecord ? attendanceRecord.classesAttended : "0"; // Default to "0" if no attendance record
+      return attendanceRecord
+        ? {
+            classesAttended: attendanceRecord.classesAttended,
+            totalClasses: attendanceRecord.totalClasses,
+          }
+        : { classesAttended: "0", totalClasses: "0" }; // Default to "0" if no attendance record
     });
+
+    const totalAttended = attendanceBySubject.reduce(
+      (sum, subject) => sum + Number(subject.classesAttended),
+      0
+    );
+    const totalPossible = attendanceBySubject.reduce(
+      (sum, subject) => sum + Number(subject.totalClasses),
+      0
+    );
+    const percentage =
+      totalPossible > 0
+        ? ((totalAttended / totalPossible) * 100).toFixed(2)
+        : "0.00";
+
     return {
       student,
       attendance: attendanceBySubject,
+      totalAttended,
+      totalPossible,
+      percentage,
     };
   });
 
@@ -176,28 +198,60 @@ const AttendanceEntry = () => {
                 <th className="py-2 border">S.No</th>
                 <th className="py-2 border">Roll No</th>
                 <th className="py-2 border">Name</th>
-                {subjectOptions.map((subject) => (
-                  <th key={subject._id} className="py-2 border">
-                    {subject.name}
-                  </th>
-                ))}
+                {subjectOptions.map((subject) => {
+                  // Find the totalClasses for this subject from the attendance data
+                  const totalClassesForSubject =
+                    attendanceData.find((att) => att.subject === subject._id)
+                      ?.totalClasses || 0; // Use 0 as a default if not found
+
+                  return (
+                    <th key={subject._id} className="py-2 border">
+                      {subject.name} <br /> (Total: {totalClassesForSubject})
+                    </th>
+                  );
+                })}
+
+                {/* Calculate totalClasses combined for all unique subjects */}
+                <th className="py-2 border">
+                  Total <br />({""}
+                  {[
+                    ...new Set(
+                      subjectOptions.map((subject) => {
+                        const totalClasses =
+                          attendanceData.find(
+                            (att) => att.subject === subject._id
+                          )?.totalClasses || 0;
+                        return totalClasses;
+                      })
+                    ),
+                  ].reduce((sum, value) => sum + value, 0)}
+                  )
+                </th>
+                <th className="py-2 border">Percentage</th>
               </tr>
             </thead>
+
             <tbody>
               {groupedAttendanceData.map((record, index) => (
                 <tr key={record.student._id}>
-                  <td className="p-2 border text-center">{index + 1}</td>
-                  <td className="p-2 border text-center">
+                  <td className="p-3 border text-center">{index + 1}</td>
+                  <td className="p-3 border text-center">
                     {record.student.rollNo}
                   </td>
-                  <td className="p-2 border text-center">
+                  <td className="p-3 border text-center">
                     {record.student.name}
                   </td>
                   {record.attendance.map((attended, subIndex) => (
-                    <td key={subIndex} className="p-2 border text-center">
-                      {attended}
+                    <td key={subIndex} className="p-3 border text-center">
+                      {attended.classesAttended}
                     </td>
                   ))}
+                  <td className="p-3 border text-center">
+                    {record.totalAttended}
+                  </td>
+                  <td className="p-3 border text-center">
+                    {record.percentage}%
+                  </td>
                 </tr>
               ))}
             </tbody>
