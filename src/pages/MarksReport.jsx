@@ -156,7 +156,7 @@ const MarksReport = () => {
       </form>
       {/* Conditionally render the table after marks data is fetched */}
       {uniqueMarksData.length > 0 && !loading && (
-        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-4xl">
+        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-5xl">
           <h2 className="text-2xl font-semibold mb-4">Marks Table</h2>
           <table className="min-w-full bg-white">
             <thead>
@@ -169,24 +169,31 @@ const MarksReport = () => {
                     {subject.name}
                   </th>
                 ))}
-                <th className="py-2 border">Average Marks</th>
+                <th className="py-2 border">Total Marks</th>
+                <th className="py-2 border">Percentage</th>
               </tr>
             </thead>
             <tbody>
               {uniqueMarksData.map((record, index) => {
-                // Calculate total marks and count of subjects
                 let totalMarks = 0;
-                const numberOfSubjects = subjectOptions.length;
+                let totalMaxMarks = 0;
 
-                subjectOptions.forEach((subject) => {
-                  const mark = record.marks[subject._id] || 0; // Use 0 if mark is undefined
-                  totalMarks += mark; // Accumulate total marks
+                // Calculate total marks and accumulate maxMarks for each subject
+                marksData.forEach((markRecord) => {
+                  if (markRecord.student._id === record.student._id) {
+                    const subjectMarks = markRecord.marks || 0; // Get the marks for this subject
+                    const maxMarksForSubject = markRecord.maxMarks || 100; // Get maxMarks from the API response, default to 100 if missing
+
+                    totalMarks += subjectMarks;
+                    totalMaxMarks += maxMarksForSubject; // Accumulate the max marks from each subject
+                  }
                 });
 
-                const averageMarks =
-                  numberOfSubjects > 0
-                    ? (totalMarks / numberOfSubjects).toFixed(2)
-                    : "-"; // Calculate average and format it to 2 decimal places
+                // Calculate percentage based on total max marks
+                const percentage =
+                  totalMaxMarks > 0
+                    ? ((totalMarks / totalMaxMarks) * 100).toFixed(2)
+                    : "-"; // Calculate percentage and format it to 2 decimal places
 
                 return (
                   <tr key={record.student._id}>
@@ -204,7 +211,8 @@ const MarksReport = () => {
                           : "0"}
                       </td>
                     ))}
-                    <td className="p-2 border text-center">{averageMarks}</td>
+                    <td className="p-2 border text-center">{totalMarks}</td>
+                    <td className="p-2 border text-center">{percentage} %</td>
                   </tr>
                 );
               })}
