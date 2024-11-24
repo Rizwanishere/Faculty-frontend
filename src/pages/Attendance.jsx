@@ -11,6 +11,7 @@ const Attendance = () => {
     semester: "",
     section: "",
     subject: "",
+    month: "", 
     period: "",
   });
   const selectedBranch = localStorage.getItem("selectedBranch");
@@ -19,12 +20,11 @@ const Attendance = () => {
   // Fetch attendance from the backend
   const fetchAttendance = async () => {
     const currentDate = new Date();
-    const month = currentDate.getMonth() + 1; // Months are 0-based
     const year = currentDate.getFullYear();
     if (filters.period) {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/students/attendance/month/${month}/year/${year}/period/${filters.period}`
+          `http://localhost:3000/api/students/attendance/month/${filters.month}/year/${year}/period/${filters.period}`
         );
         console.log("Attendance Data:", response.data);
         setAttendanceData(response.data); // Assuming `attendanceData` is a state variable to hold the attendance data
@@ -67,7 +67,7 @@ const Attendance = () => {
     // Fetch subjects when year and semester change
     fetchSubjects();
     fetchAttendance();
-  }, [filters.year, filters.semester, filters.period]); // Triggers when either year, semester, or period is updated
+  }, [filters.year, filters.semester, filters.month, filters.period]); // Triggers when either year, semester, or period is updated
 
   useEffect(() => {
     if (submitted) fetchStudents();
@@ -114,7 +114,6 @@ const Attendance = () => {
   const handleSave = async () => {
     console.log("Attendance Data before processing:", attendanceData);
     const currentDate = new Date();
-    const month = currentDate.getMonth() + 1; // Months are 0-based
     const year = currentDate.getFullYear();
 
     try {
@@ -135,7 +134,7 @@ const Attendance = () => {
                 totalClasses, // Assuming this is a predefined variable
                 classesAttended,
                 period: filters.period,
-                month,
+                month: filters.month,
                 year,
               }
             );
@@ -169,7 +168,6 @@ const Attendance = () => {
     subject
   ) => {
     const currentDate = new Date();
-    const month = currentDate.getMonth() + 1; // Months are 0-based
     const year = currentDate.getFullYear();
 
     try {
@@ -182,7 +180,7 @@ const Attendance = () => {
           totalClasses: totalClasses, // Ensure totalClasses is set
           classesAttended: classesAttended,
           period: filters.period,
-          month: month,
+          month: filters.month,
           year: year,
         }
       );
@@ -257,12 +255,33 @@ const Attendance = () => {
             ))}
           </select>
 
+           {/* New Month Dropdown */}
+           <select
+            className="border p-2 rounded"
+            value={filters.month}
+            onChange={(e) => setFilters({ ...filters, month: e.target.value })}
+          >
+            <option value="">Select Month</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+
           <select
             value={filters.period}
             onChange={(e) => setFilters({ ...filters, period: e.target.value })}
             className="border p-2 rounded"
           >
-            <option value="">Select Attendance Date</option>
+            <option value="">Select Attendance Period</option>
             <option value="15th">Up to 15th</option>
             <option value="30th">Up to 30th</option>
           </select>
@@ -336,7 +355,7 @@ const Attendance = () => {
           {/* Save button */}
           <button
             onClick={handleSave}
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            className="mt-4 px-4 py-2 bg-secondary hover:bg-primary text-white rounded"
           >
             Save Attendance
           </button>

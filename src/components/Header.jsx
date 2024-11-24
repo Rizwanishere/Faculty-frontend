@@ -26,7 +26,7 @@ const Header = () => {
           <nav>
             <ul className="flex space-x-4 sm:space-x-6 text-white font-bold">
               <li className="relative group hidden sm:block text-xl mr-24">
-                FACULTY MANAGEMENT SYSTEM
+                STUDENT MANAGEMENT SOFTWARE
               </li>
             </ul>
           </nav>

@@ -197,7 +197,7 @@ const AttendanceEntry = () => {
 
       {/* Conditionally render the table after attendance data is fetched */}
       {groupedAttendanceData.length > 0 && !loading && (
-        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-4xl">
+        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-5xl">
           <h2 className="text-2xl font-semibold mb-4">Attendance Table</h2>
           <table className="min-w-full bg-white">
             <thead>
