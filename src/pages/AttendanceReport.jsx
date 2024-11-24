@@ -6,6 +6,7 @@ const AttendanceEntry = () => {
   const [selectedSemester, setSelectedSemester] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedPeriod, setSelectedPeriod] = useState("");
   const [selectedYearAttendance, setSelectedYearAttendance] = useState("");
   const [students, setStudents] = useState([]);
   const [subjectOptions, setSubjectOptions] = useState([]);
@@ -61,7 +62,7 @@ const AttendanceEntry = () => {
         try {
           setLoading(true);
           const response = await axios.get(
-            `http://localhost:3000/api/students/attendance/month/${selectedMonth}/year/${selectedYearAttendance}/period/30th`
+            `http://localhost:3000/api/students/attendance/month/${selectedMonth}/year/${selectedYearAttendance}/period/${selectedPeriod}`
           );
           setAttendanceData(response.data);
         } catch (error) {
@@ -180,6 +181,17 @@ const AttendanceEntry = () => {
             <option value="10">October</option>
             <option value="11">November</option>
             <option value="12">December</option>
+          </select>
+
+          {/* Period for Attendance */}
+          <select
+            className="border p-2 rounded"
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+          >
+            <option value="">Select Attendance Period</option>
+            <option value="15th">Upto 15th</option>
+            <option value="30th">Upto 30th</option>
           </select>
 
           {/* Year for Attendance */}
