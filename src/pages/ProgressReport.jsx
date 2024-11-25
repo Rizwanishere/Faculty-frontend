@@ -45,6 +45,49 @@ const ProgressReport = () => {
     }
   };
 
+  const filterAttendance = (attendance) => {
+    const filteredAttendance = {};
+
+    attendance.forEach((record) => {
+      // Create a unique key for each subject, month, and year
+      const key = `${record.subjectId}-${record.year}-${record.month}`;
+
+      // If no record exists for this key, add it
+      if (!filteredAttendance[key]) {
+        filteredAttendance[key] = record;
+      } else {
+        // If a record already exists and the current record is `period:30th`, replace it
+        if (record.period === "30th") {
+          filteredAttendance[key] = record;
+        }
+      }
+    });
+
+    return Object.values(filteredAttendance); // Return filtered attendance as an array
+  };
+
+  const calculateAttendanceBySubject = (attendance) => {
+    const groupedAttendance = {};
+
+    attendance.forEach((record) => {
+      if (!groupedAttendance[record.subjectId]) {
+        groupedAttendance[record.subjectId] = {
+          subjectId: record.subjectId,
+          subjectName: record.subjectName,
+          totalClasses: 0,
+          classesAttended: 0,
+        };
+      }
+
+      // Sum up the total classes and classes attended for the subject
+      groupedAttendance[record.subjectId].totalClasses += record.totalClasses;
+      groupedAttendance[record.subjectId].classesAttended +=
+        record.classesAttended;
+    });
+
+    return Object.values(groupedAttendance); // Return grouped attendance as an array
+  };
+
   const groupDataBySubject = () => {
     if (!reportData) return [];
 
@@ -108,63 +151,30 @@ const ProgressReport = () => {
       (totals, data) => {
         totals.totalClasses += data.totalClasses || 0;
         totals.classesAttended += data.classesAttended || 0;
+        totals.totalMarks += data.totalMarks || 0;
         return totals;
       },
-      { totalClasses: 0, classesAttended: 0 }
+      { totalClasses: 0, classesAttended: 0, totalMarks: 0 }
     );
 
-    const percentage = attendanceSummary.totalClasses
+    const attendancePercentage = attendanceSummary.totalClasses
       ? (
           (attendanceSummary.classesAttended / attendanceSummary.totalClasses) *
           100
         ).toFixed(2)
       : 0;
 
-    return { ...attendanceSummary, percentage };
+    const marksPercentage = groupedData.length
+      ? (
+          (attendanceSummary.totalMarks / (groupedData.length * 40)) *
+          100
+        ).toFixed(2)
+      : 0;
+
+    return { ...attendanceSummary, attendancePercentage, marksPercentage };
   };
 
-  const filterAttendance = (attendance) => {
-    const filteredAttendance = {};
-
-    attendance.forEach((record) => {
-      // Create a unique key for each subject, month, and year
-      const key = `${record.subjectId}-${record.year}-${record.month}`;
-
-      // If no record exists for this key, add it
-      if (!filteredAttendance[key]) {
-        filteredAttendance[key] = record;
-      } else {
-        // If a record already exists and the current record is `period:30th`, replace it
-        if (record.period === "30th") {
-          filteredAttendance[key] = record;
-        }
-      }
-    });
-
-    return Object.values(filteredAttendance); // Return filtered attendance as an array
-  };
-
-  const calculateAttendanceBySubject = (attendance) => {
-    const groupedAttendance = {};
-
-    attendance.forEach((record) => {
-      if (!groupedAttendance[record.subjectId]) {
-        groupedAttendance[record.subjectId] = {
-          subjectId: record.subjectId,
-          subjectName: record.subjectName,
-          totalClasses: 0,
-          classesAttended: 0,
-        };
-      }
-
-      // Sum up the total classes and classes attended for the subject
-      groupedAttendance[record.subjectId].totalClasses += record.totalClasses;
-      groupedAttendance[record.subjectId].classesAttended +=
-        record.classesAttended;
-    });
-
-    return Object.values(groupedAttendance); // Return grouped attendance as an array
-  };
+  const totals = calculateTotals();
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
@@ -267,26 +277,34 @@ const ProgressReport = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td
-                  colSpan="2"
-                  className="border border-gray-300 p-2 font-semibold text-right"
-                >
+              {/* Total Row */}
+              <tr className="text-center font-semibold">
+                <td colSpan="2" className="border border-gray-300 p-2">
                   Total
                 </td>
                 <td className="border border-gray-300 p-2">
-                  {calculateTotals().totalClasses}
+                  {totals.totalClasses}
                 </td>
                 <td className="border border-gray-300 p-2">
-                  {calculateTotals().classesAttended}
+                  {totals.classesAttended}
                 </td>
                 <td colSpan="4" className="border border-gray-300 p-2">
-                  Percentage: {calculateTotals().percentage}%
+                  {totals.totalMarks}
                 </td>
               </tr>
-            </tfoot>
+              {/* Percentage Row */}
+              <tr className="text-center font-semibold">
+                <td colSpan="2" className="border border-gray-300 p-2">
+                  Percentage
+                </td>
+                <td colSpan="2" className="border border-gray-300 p-2">
+                  {totals.attendancePercentage}%
+                </td>
+                <td colSpan="4" className="border border-gray-300 p-2">
+                  {totals.marksPercentage}%
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
       )}
