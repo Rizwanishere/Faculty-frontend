@@ -3,6 +3,7 @@ import axios from "axios";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import moment from "moment";
+import html2pdf from "html2pdf.js";
 
 const ProgressReport = () => {
   const [rollNo, setRollNo] = useState("");
@@ -187,6 +188,32 @@ const ProgressReport = () => {
     });
   };
 
+  const captureAndGeneratePDF = () => {
+    const element = document.getElementById("elementToCapture"); // Target the element you want to capture
+
+    const options = {
+      margin: 1,
+      filename: "output.pdf",
+      image: { type: "jpeg", quality: 1 }, // Maximum quality for images
+      html2canvas: {
+        scale: 4, // Increase the scale to improve clarity (try different values)
+        logging: true, // Set to true to debug rendering issues
+        useCORS: true, // Use CORS for external images (important if using external logos or images)
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
+        precision: 16, // High precision for better quality
+      },
+    };
+
+    html2pdf()
+      .from(element) // Element to capture
+      .set(options) // Set the options
+      .save(); // Trigger download of the generated PDF
+  };
+
   const presentDate = new Date().toLocaleDateString("en-GB");
 
   return (
@@ -205,7 +232,7 @@ const ProgressReport = () => {
             type="text"
             value={rollNo}
             onChange={(e) => setRollNo(e.target.value)}
-            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-black"
             placeholder="Enter Roll No"
             required
           />
@@ -218,7 +245,7 @@ const ProgressReport = () => {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-black"
             required
           />
         </div>
@@ -230,7 +257,7 @@ const ProgressReport = () => {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-black"
             required
           />
         </div>
@@ -249,6 +276,7 @@ const ProgressReport = () => {
       {/* Report Section */}
       {reportData && (
         <div
+          id="elementToCapture"
           ref={printRef}
           className="w-[210mm] h-[297mm] mx-auto p-10 bg-white"
           style={{ fontFamily: "Times New Roman, serif" }}
@@ -312,8 +340,8 @@ const ProgressReport = () => {
           </div>
 
           {/* Greeting Section */}
-          <div className="mt-6">
-            <p className="text-md">Dear Parent/Guardian,</p>
+          <div className="mt-2">
+            <p className="text-md font-bold">Dear Parent/Guardian,</p>
             <p className="text-md mt-2">
               The following are the details of the attendance and Continuous
               Internal Evaluation-1 of your ward. It is furnished for your
@@ -436,9 +464,13 @@ const ProgressReport = () => {
             <table className="mt-1 w-full border border-collapse border-black text-sm">
               <thead>
                 <tr>
-                  <th className="border border-black px-2 py-1">___ Sem.</th>
-                  <th className="border border-black px-2 py-1">___ Sem.</th>
-                  <th className="border border-black px-2 py-1">
+                  <th className="border border-black px-2 py-2 text-center min-h-[40px]">
+                    ___ Sem.
+                  </th>
+                  <th className="border border-black px-2 py-2 text-center min-h-[40px]">
+                    ___ Sem.
+                  </th>
+                  <th className="border border-black px-2 py-2 text-center min-h-[40px]">
                     Remarks by Head of the Department
                   </th>
                 </tr>
@@ -446,9 +478,15 @@ const ProgressReport = () => {
               <tbody>
                 {/* Empty rows */}
                 <tr>
-                  <td className="border border-black px-2 py-1 h-8"></td>
-                  <td className="border border-black px-2 py-1 h-8"></td>
-                  <td className="border border-black px-2 py-1 h-8"></td>
+                  <td className="border border-black px-2 py-2 text-white">
+                    hello
+                  </td>
+                  <td className="border border-black px-2 py-2 text-white">
+                    hello
+                  </td>
+                  <td className="border border-black px-2 py-2 text-white">
+                    hello
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -476,12 +514,7 @@ const ProgressReport = () => {
 
       {/* Button to Generate PDF */}
       {reportData && (
-        <button
-          onClick={generatePDF}
-          className="bg-blue-500 text-white p-2 rounded mt-4"
-        >
-          Generate PDF
-        </button>
+        <button onClick={captureAndGeneratePDF}>Download PDF</button>
       )}
     </div>
   );
