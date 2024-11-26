@@ -514,7 +514,12 @@ const ProgressReport = () => {
 
       {/* Button to Generate PDF */}
       {reportData && (
-        <button onClick={captureAndGeneratePDF}>Download PDF</button>
+        <button
+          onClick={captureAndGeneratePDF}
+          className="bg-blue-500 text-white p-2 rounded mt-4"
+        >
+          Download PDF
+        </button>
       )}
     </div>
   );

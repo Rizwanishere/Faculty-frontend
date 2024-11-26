@@ -9,18 +9,25 @@ function ReportsPage() {
           Reports Dashboard
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Attendance Reports Section */}
           <Link to="/reports/attendance">
-            <div className="border border-primary border-2 p-40 rounded-lg shadow-lg flex items-center justify-center">
-              <h2 className="text-2xl font-semibold">Attendance Reports</h2>
+            <div className="border border-primary border-2 p-20 rounded-lg shadow-2xl flex items-center justify-center">
+              <h2 className="text-2xl font-semibold text-primary">Attendance Report</h2>
             </div>
           </Link>
 
           {/* Marks Reports Section */}
           <Link to="/reports/marks">
-            <div className="border border-primary border-2 p-40 rounded-lg shadow-lg flex items-center justify-center">
-              <h2 className="text-2xl font-semibold">Marks Reports</h2>
+            <div className="border border-primary border-2 p-20 rounded-lg shadow-2xl flex items-center justify-center">
+              <h2 className="text-2xl font-semibold text-primary">Marks Report</h2>
+            </div>
+          </Link>
+
+          {/* Progress Report Section */}
+          <Link to="/progressreport">
+            <div className="border border-primary border-2 p-20 rounded-lg shadow-2xl flex items-center justify-center">
+              <h2 className="text-2xl font-semibold text-primary">Progress Report</h2>
             </div>
           </Link>
         </div>
