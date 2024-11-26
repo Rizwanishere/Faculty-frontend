@@ -10,6 +10,15 @@ const ProgressReport = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Function to calculate semester number based on year and semester
+  const calculateSemester = (year, semester) => (year - 1) * 2 + semester;
+
+  // Function to convert a number to a Roman numeral
+  const convertToRoman = (num) => {
+    const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+    return romanNumerals[num - 1] || num;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -237,17 +246,33 @@ const ProgressReport = () => {
       {reportData && (
         <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-4xl">
           <h2 className="text-xl font-semibold mb-4">
-            Report for {reportData.studentName}
+            Report for {reportData.studentName}, {reportData.rollNo}, B.E-{" "}
+            {convertToRoman(
+              calculateSemester(reportData.year, reportData.semester)
+            )}{" "}
+            Semester
           </h2>
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr>
-                <th className="border border-gray-300 p-2">S. No.</th>
-                <th className="border border-gray-300 p-2">Course Title</th>
-                <th className="border border-gray-300 p-2">
-                  No. of Classes Conducted
+                <th rowSpan="2" className="border border-gray-300 p-2">
+                  S. No.
                 </th>
-                <th className="border border-gray-300 p-2">
+                <th rowSpan="2" className="border border-gray-300 p-2">
+                  Course Title
+                </th>
+                <th colSpan="2" className="border border-gray-300 p-2">
+                  Attendance <br />
+                  (From {moment(startDate).format("DD-MM-YYYY")} to{" "}
+                  {moment(endDate).format("DD-MM-YYYY")})
+                </th>
+                <th colSpan="4" className="border border-gray-300 p-2">
+                  CIE-1 Marks <br />
+                </th>
+              </tr>
+              <tr>
+                <th className="border border-gray-300 p-2">No. of Classes</th>
+                <th className="border border-gray-300 p-2 w-[130px]">
                   No. of Classes Attended
                 </th>
                 <th className="border border-gray-300 p-2">DT (20)</th>
@@ -263,7 +288,7 @@ const ProgressReport = () => {
                   <td className="border border-gray-300 p-2">
                     {data.subjectName}
                   </td>
-                  <td className="border border-gray-300 p-2">
+                  <td className="border border-gray-300 p-2 font-bold">
                     {data.totalClasses || "-"}
                   </td>
                   <td className="border border-gray-300 p-2">
@@ -282,7 +307,7 @@ const ProgressReport = () => {
                 <td colSpan="2" className="border border-gray-300 p-2">
                   Total
                 </td>
-                <td className="border border-gray-300 p-2">
+                <td className="border border-gray-300 p-2 font-bold">
                   {totals.totalClasses}
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -297,10 +322,16 @@ const ProgressReport = () => {
                 <td colSpan="2" className="border border-gray-300 p-2">
                   Percentage
                 </td>
-                <td colSpan="2" className="border border-gray-300 p-2">
+                <td
+                  colSpan="2"
+                  className="border border-gray-300 p-2 font-bold"
+                >
                   {totals.attendancePercentage}%
                 </td>
-                <td colSpan="4" className="border border-gray-300 p-2">
+                <td
+                  colSpan="4"
+                  className="border border-gray-300 p-2 font-bold"
+                >
                   {totals.marksPercentage}%
                 </td>
               </tr>
