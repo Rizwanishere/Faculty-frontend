@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Loader from "../utils/Loader";
 
 const AttendanceEntry = () => {
   const [selectedYear, setSelectedYear] = useState("");
@@ -272,7 +273,7 @@ const AttendanceEntry = () => {
           </table>
         </div>
       )}
-      {loading && <p>Loading...</p>}
+      {loading && <Loader loading={loading} />}
     </div>
   );
 };

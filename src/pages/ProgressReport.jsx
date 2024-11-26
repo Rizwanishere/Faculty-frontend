@@ -4,6 +4,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import moment from "moment";
 import html2pdf from "html2pdf.js";
+import Loader from "../utils/Loader";
 
 const ProgressReport = () => {
   const [rollNo, setRollNo] = useState("");
@@ -271,7 +272,7 @@ const ProgressReport = () => {
 
       {/* Error and Loading States */}
       {error && <p className="text-red-500">{error}</p>}
-      {loading && <p>Loading...</p>}
+      {loading && <Loader loading={loading} />}
 
       {/* Report Section */}
       {reportData && (
