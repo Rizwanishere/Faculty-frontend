@@ -80,6 +80,7 @@ const AttendanceEntry = () => {
     selectedYear,
     selectedSemester,
     selectedSection,
+    selectedPeriod
   ]);
 
   // Group attendance data by student ID
